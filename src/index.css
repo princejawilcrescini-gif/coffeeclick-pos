@@ -1,0 +1,212 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@layer base {
+  :root {
+    --background: 210 20% 98%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 168 76% 32%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 20% 96%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 20% 94%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 168 76% 95%;
+    --accent-foreground: 168 76% 25%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 168 76% 32%;
+
+    --radius: 0.75rem;
+
+    /* Sidebar - Dark theme */
+    --sidebar-background: 222 47% 11%;
+    --sidebar-foreground: 210 20% 90%;
+    --sidebar-primary: 168 76% 42%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 222 47% 16%;
+    --sidebar-accent-foreground: 210 20% 90%;
+    --sidebar-border: 222 47% 18%;
+    --sidebar-ring: 168 76% 42%;
+    --sidebar-muted: 215 16% 57%;
+
+    /* POS specific tokens */
+    --pos-product-card: 0 0% 100%;
+    --pos-product-card-hover: 168 76% 97%;
+    --pos-cart-bg: 0 0% 100%;
+    --pos-stat-gradient-from: 168 76% 32%;
+    --pos-stat-gradient-to: 168 60% 45%;
+  }
+
+  .dark {
+    --background: 222 47% 6%;
+    --foreground: 210 20% 98%;
+
+    --card: 222 47% 9%;
+    --card-foreground: 210 20% 98%;
+
+    --popover: 222 47% 9%;
+    --popover-foreground: 210 20% 98%;
+
+    --primary: 168 76% 42%;
+    --primary-foreground: 222 47% 11%;
+
+    --secondary: 222 47% 14%;
+    --secondary-foreground: 210 20% 98%;
+
+    --muted: 222 47% 14%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 168 76% 15%;
+    --accent-foreground: 168 76% 80%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 20% 98%;
+
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 0%;
+
+    --border: 222 47% 18%;
+    --input: 222 47% 18%;
+    --ring: 168 76% 42%;
+
+    --sidebar-background: 222 47% 6%;
+    --sidebar-foreground: 210 20% 90%;
+    --sidebar-primary: 168 76% 42%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 222 47% 12%;
+    --sidebar-accent-foreground: 210 20% 90%;
+    --sidebar-border: 222 47% 14%;
+    --sidebar-ring: 168 76% 42%;
+    --sidebar-muted: 215 16% 57%;
+
+    --pos-product-card: 222 47% 12%;
+    --pos-product-card-hover: 168 76% 15%;
+    --pos-cart-bg: 222 47% 9%;
+    --pos-stat-gradient-from: 168 76% 32%;
+    --pos-stat-gradient-to: 168 60% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+@layer utilities {
+  .pos-gradient {
+    background: linear-gradient(135deg, hsl(var(--pos-stat-gradient-from)) 0%, hsl(var(--pos-stat-gradient-to)) 100%);
+  }
+
+  .pos-card-hover {
+    @apply transition-all duration-200 ease-out;
+  }
+
+  .pos-card-hover:hover {
+    @apply shadow-lg -translate-y-0.5;
+    background-color: hsl(var(--pos-product-card-hover));
+  }
+
+  .pos-sidebar-item {
+    @apply transition-colors duration-150;
+  }
+
+  .pos-sidebar-item:hover {
+    background-color: hsl(var(--sidebar-accent));
+  }
+
+  .pos-sidebar-item.active {
+    background-color: hsl(var(--sidebar-accent));
+    border-left: 3px solid hsl(var(--sidebar-primary));
+  }
+
+  .pos-pulse {
+    animation: pos-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pos-pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
+  }
+
+  .pos-fade-in {
+    animation: pos-fade-in 0.2s ease-out;
+  }
+
+  @keyframes pos-fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .pos-slide-in {
+    animation: pos-slide-in 0.3s ease-out;
+  }
+
+  @keyframes pos-slide-in {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .pos-scale-in {
+    animation: pos-scale-in 0.15s ease-out;
+  }
+
+  @keyframes pos-scale-in {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+}
