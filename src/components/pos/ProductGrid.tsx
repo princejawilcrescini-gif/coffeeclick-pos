@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { Plus, Pencil, Check, X } from "lucide-react";
+import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useProductStore, type Product } from "@/stores/productStore";
 
@@ -27,26 +26,12 @@ interface ProductGridProps {
 }
 
 export function ProductGrid({ selectedCategory, onCategoryChange, onAddToCart }: ProductGridProps) {
-  const { products, updateProduct } = useProductStore();
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [priceInput, setPriceInput] = useState("");
+  const { products } = useProductStore();
 
   const sellableProducts = products.filter(p => p.category !== "Utensils");
   const filteredProducts = selectedCategory === "All"
     ? sellableProducts
     : sellableProducts.filter(p => p.category === selectedCategory);
-
-  const startEdit = (product: Product) => {
-    setEditingId(product.id);
-    setPriceInput(product.price.toFixed(2));
-  };
-
-  const savePrice = (product: Product) => {
-    const nextPrice = Number(priceInput);
-    if (priceInput.trim() === "" || !Number.isFinite(nextPrice) || nextPrice < 0) return;
-    updateProduct(product.id, { price: nextPrice });
-    setEditingId(null);
-  };
 
   return (
     <div className="flex-1 flex flex-col">
@@ -76,27 +61,7 @@ export function ProductGrid({ selectedCategory, onCategoryChange, onAddToCart }:
             </button>
 
             <div className="flex items-center justify-between gap-2 min-h-9">
-              {editingId === product.id ? (
-                <div className="flex items-center gap-1 w-full">
-                  <span className="text-sm font-semibold">₱</span>
-                  <input autoFocus type="number" min="0" step="0.01" value={priceInput}
-                    onChange={(event) => setPriceInput(event.target.value)}
-                    onFocus={(event) => event.currentTarget.select()}
-                    onKeyDown={(event) => { if (event.key === "Enter") savePrice(product); if (event.key === "Escape") setEditingId(null); }}
-                    aria-label={`New price for ${product.name}`}
-                    className="min-w-0 w-full h-9 rounded-md border border-primary bg-background px-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
-                  <button type="button" onClick={() => savePrice(product)} title="Save price" className="h-8 w-8 shrink-0 rounded-md bg-primary text-primary-foreground flex items-center justify-center"><Check className="w-4 h-4" /></button>
-                  <button type="button" onClick={() => setEditingId(null)} title="Cancel" className="h-8 w-8 shrink-0 rounded-md bg-secondary text-foreground flex items-center justify-center"><X className="w-4 h-4" /></button>
-                </div>
-              ) : (
-                <>
-                  <span className="text-lg font-bold text-primary">₱{product.price.toFixed(2)}</span>
-                  <button type="button" onClick={() => startEdit(product)} title={`Edit ${product.name} price`}
-                    className="h-8 px-2 rounded-md bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground flex items-center gap-1 text-xs font-medium">
-                    <Pencil className="w-3.5 h-3.5" /> Edit price
-                  </button>
-                </>
-              )}
+              <span className="text-lg font-bold text-primary">₱{product.price.toFixed(2)}</span>
             </div>
 
             <div className="mt-2 flex items-center gap-1">
