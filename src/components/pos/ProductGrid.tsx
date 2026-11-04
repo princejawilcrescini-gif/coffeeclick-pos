@@ -1,4 +1,5 @@
-import { Plus } from "lucide-react";
+import { useState } from "react";
+import { Plus, Pencil, Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useProductStore, type Product } from "@/stores/productStore";
 
@@ -26,85 +27,82 @@ interface ProductGridProps {
 }
 
 export function ProductGrid({ selectedCategory, onCategoryChange, onAddToCart }: ProductGridProps) {
-  const { products } = useProductStore();
+  const { products, updateProduct } = useProductStore();
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [priceInput, setPriceInput] = useState("");
 
   const sellableProducts = products.filter(p => p.category !== "Utensils");
   const filteredProducts = selectedCategory === "All"
     ? sellableProducts
     : sellableProducts.filter(p => p.category === selectedCategory);
 
+  const startEdit = (product: Product) => {
+    setEditingId(product.id);
+    setPriceInput(product.price.toFixed(2));
+  };
+
+  const savePrice = (product: Product) => {
+    const nextPrice = Number(priceInput);
+    if (priceInput.trim() === "" || !Number.isFinite(nextPrice) || nextPrice < 0) return;
+    updateProduct(product.id, { price: nextPrice });
+    setEditingId(null);
+  };
+
   return (
     <div className="flex-1 flex flex-col">
-      {/* Category Tabs */}
       <div className="flex gap-2 mb-6 flex-wrap">
         {categories.map((category) => (
-          <button
-            key={category}
-            onClick={() => onCategoryChange(category)}
-            className={cn(
-              "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150",
-              selectedCategory === category
-                ? "bg-primary text-primary-foreground shadow-md"
-                : "bg-card text-muted-foreground hover:bg-secondary hover:text-foreground"
-            )}
-          >
+          <button key={category} onClick={() => onCategoryChange(category)}
+            className={cn("px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150",
+              selectedCategory === category ? "bg-primary text-primary-foreground shadow-md" : "bg-card text-muted-foreground hover:bg-secondary hover:text-foreground")}>
             {category}
           </button>
         ))}
       </div>
 
-      {/* Products Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {filteredProducts.map((product) => (
-          <button
-            key={product.id}
-            onClick={() => product.stock > 0 && onAddToCart(product)}
-            disabled={product.stock === 0}
-            className={cn(
-              "group bg-pos-product-card rounded-xl p-3 text-left pos-card-hover border border-border/50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
-              product.stock === 0 && "opacity-50 cursor-not-allowed"
-            )}
-          >
-            {/* Product Photo */}
-            <div className="relative aspect-[4/3] rounded-lg bg-gradient-to-br from-muted to-secondary mb-3 overflow-hidden">
-              <div className="absolute inset-0 flex items-center justify-center text-4xl">
-                {getCategoryEmoji(product.category)}
+          <div key={product.id} className={cn("group bg-pos-product-card rounded-xl p-3 border border-border/50 pos-card-hover", product.stock === 0 && "opacity-60")}>
+            <button type="button" onClick={() => product.stock > 0 && onAddToCart(product)} disabled={product.stock === 0}
+              className="block w-full text-left focus:outline-none focus:ring-2 focus:ring-primary rounded-lg">
+              <div className="relative aspect-[4/3] rounded-lg bg-gradient-to-br from-muted to-secondary mb-3 overflow-hidden">
+                <div className="absolute inset-0 flex items-center justify-center text-4xl">{getCategoryEmoji(product.category)}</div>
+                <img src={product.image || productPhotos[product.name] || getCategoryPhoto(product.category)} alt={product.name} loading="lazy"
+                  className="relative z-10 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  onError={(event) => { event.currentTarget.style.display = "none"; }} />
               </div>
-              <img
-                src={product.image || productPhotos[product.name] || getCategoryPhoto(product.category)}
-                alt={product.name}
-                loading="lazy"
-                className="relative z-10 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                onError={(event) => {
-                  event.currentTarget.style.display = "none";
-                }}
-              />
-            </div>
+              <h3 className="font-semibold text-foreground truncate mb-1">{product.name}</h3>
+              <p className="text-xs text-muted-foreground mb-2">{product.category}</p>
+            </button>
 
-            {/* Product Info */}
-            <h3 className="font-semibold text-foreground truncate mb-1">{product.name}</h3>
-            <p className="text-xs text-muted-foreground mb-2">{product.category}</p>
-
-            <div className="flex items-center justify-between">
-              <span className="text-lg font-bold text-primary">₱{product.price.toFixed(2)}</span>
-              {product.stock > 0 && (
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:scale-110 transition-all duration-200">
-                  <Plus className="w-4 h-4 text-primary group-hover:text-primary-foreground" />
+            <div className="flex items-center justify-between gap-2 min-h-9">
+              {editingId === product.id ? (
+                <div className="flex items-center gap-1 w-full">
+                  <span className="text-sm font-semibold">₱</span>
+                  <input autoFocus type="number" min="0" step="0.01" value={priceInput}
+                    onChange={(event) => setPriceInput(event.target.value)}
+                    onKeyDown={(event) => { if (event.key === "Enter") savePrice(product); if (event.key === "Escape") setEditingId(null); }}
+                    aria-label={`New price for ${product.name}`}
+                    className="min-w-0 w-full h-9 rounded-md border border-primary bg-background px-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
+                  <button type="button" onClick={() => savePrice(product)} title="Save price" className="h-8 w-8 shrink-0 rounded-md bg-primary text-primary-foreground flex items-center justify-center"><Check className="w-4 h-4" /></button>
+                  <button type="button" onClick={() => setEditingId(null)} title="Cancel" className="h-8 w-8 shrink-0 rounded-md bg-secondary text-foreground flex items-center justify-center"><X className="w-4 h-4" /></button>
                 </div>
+              ) : (
+                <>
+                  <span className="text-lg font-bold text-primary">₱{product.price.toFixed(2)}</span>
+                  <button type="button" onClick={() => startEdit(product)} title={`Edit ${product.name} price`}
+                    className="h-8 px-2 rounded-md bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground flex items-center gap-1 text-xs font-medium">
+                    <Pencil className="w-3.5 h-3.5" /> Edit price
+                  </button>
+                </>
               )}
             </div>
 
-            {/* Stock indicator */}
             <div className="mt-2 flex items-center gap-1">
-              <div className={cn(
-                "w-1.5 h-1.5 rounded-full",
-                product.stock > 20 ? "bg-success" : product.stock > 5 ? "bg-warning" : product.stock > 0 ? "bg-destructive" : "bg-muted"
-              )} />
-              <span className="text-xs text-muted-foreground">
-                {product.stock === 0 ? "Out of stock" : `${product.stock} in stock`}
-              </span>
+              <div className={cn("w-1.5 h-1.5 rounded-full", product.stock > 20 ? "bg-success" : product.stock > 5 ? "bg-warning" : product.stock > 0 ? "bg-destructive" : "bg-muted")} />
+              <span className="text-xs text-muted-foreground">{product.stock === 0 ? "Out of stock" : `${product.stock} in stock`}</span>
             </div>
-          </button>
+          </div>
         ))}
       </div>
     </div>
@@ -122,12 +120,7 @@ function getCategoryPhoto(category: string): string {
 }
 
 function getCategoryEmoji(category: string): string {
-  const emojis: Record<string, string> = {
-    Coffee: "☕",
-    Pastry: "🥐",
-    Beverages: "🧃",
-    Food: "🥪",
-  };
+  const emojis: Record<string, string> = { Coffee: "☕", Pastry: "🥐", Beverages: "🧃", Food: "🥪" };
   return emojis[category] || "📦";
 }
 
