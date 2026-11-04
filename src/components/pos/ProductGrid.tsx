@@ -81,6 +81,7 @@ export function ProductGrid({ selectedCategory, onCategoryChange, onAddToCart }:
                   <span className="text-sm font-semibold">₱</span>
                   <input autoFocus type="number" min="0" step="0.01" value={priceInput}
                     onChange={(event) => setPriceInput(event.target.value)}
+                    onFocus={(event) => event.currentTarget.select()}
                     onKeyDown={(event) => { if (event.key === "Enter") savePrice(product); if (event.key === "Escape") setEditingId(null); }}
                     aria-label={`New price for ${product.name}`}
                     className="min-w-0 w-full h-9 rounded-md border border-primary bg-background px-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
